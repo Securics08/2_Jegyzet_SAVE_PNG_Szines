@@ -94,5 +94,79 @@ Betöltsem mint 1 projektet: ${P.name} ?`)){if(Ke.current)Ke.current.value="";re
 </script>
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
+<!-- EXPORT VARIATION ONLY - START -->
+<style id="neon-export-only">
+#neon-export-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:2147483647;padding:16px}
+#neon-export-overlay.open{display:flex}
+#neon-export-box{width:100%;max-width:460px;background:#0a0a0a;border:2px solid #00ff41;border-radius:20px;box-shadow:0 0 18px #00ff41,0 0 60px rgba(0,255,0,.25);padding:22px 20px 18px;font-family:Consolas,monospace;color:#fff}
+.neon-e-head{border:1.5px solid #00ff41;border-radius:14px;padding:11px 14px;display:flex;align-items:center;justify-content:center;gap:10px;color:#00eaff;font-weight:900;font-size:13px;letter-spacing:.08em;background:rgba(0,255,65,.04)}
+.neon-e-lbl{margin-top:16px;color:#7a7a7a;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+#neon-e-input{margin-top:8px;width:100%;background:#001414;border:1.6px solid #00e5ff;border-radius:14px;padding:13px 16px;color:#00e5ff;font-family:Consolas,monospace;font-size:13px;font-weight:800;outline:none;box-shadow:0 0 12px rgba(0,229,255,.35)}
+.neon-e-yellow{margin-top:14px;background:#ffcc00;border-radius:14px;padding:12px 16px;color:#000;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px}
+.neon-e-meta{margin-top:12px;font-size:11px;color:#777;line-height:1.7}
+.neon-e-meta .v{color:#ccc}
+.neon-e-meta b{color:#ffcc00}
+.neon-e-actions{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.neon-e-btn{border:none;border-radius:14px;padding:12px;font-weight:900;cursor:pointer}
+.neon-e-cancel{background:#2a2a2a;color:#ddd}
+.neon-e-export{background:#8a2cff;color:#fff;box-shadow:0 0 16px rgba(138,44,255,.6)}
+</style>
+<div id="neon-export-overlay">
+ <div id="neon-export-box">
+  <div class="neon-e-head">📦 EXPORT - NEON v1 - 1. VISSZAVÉTEL</div>
+  <div class="neon-e-lbl">EXPORT NÉV</div>
+  <input id="neon-e-input" value="NEON REPO_Zöld_ V4 -  FILE ÖRÖK" spellcheck="false"/>
+  <div class="neon-e-yellow">📦 <span id="neon-e-yellow">REPO: 1. REPO - 0,00MB - 500MB</span></div>
+  <div class="neon-e-meta">
+   <div>Fájl: <span class="v" id="neon-e-fname">NEON REPO_Zöld_ V4 -  FILE ÖRÖK.json</span></div>
+   <div>Tartalom: <b id="neon-e-cnt">0</b> projekt JSON a(z) <b>1.</b> ablakból</div>
+  </div>
+  <div class="neon-e-actions">
+   <button class="neon-e-btn neon-e-cancel" id="neon-e-cancel">MÉGSE</button>
+   <button class="neon-e-btn neon-e-export" id="neon-e-ok">EXPORT</button>
+  </div>
+ </div>
+</div>
+<script id="neon-e-js">
+(function(){
+const LS="NEON_V4_LS";
+const $=id=>document.getElementById(id);
+const ov=$("neon-export-overlay"),inp=$("neon-e-input"),fname=$("neon-e-fname"),cnt=$("neon-e-cnt"),yellow=$("neon-e-yellow");
+function getP(){try{let s=localStorage.getItem(LS);if(s){let a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return []}
+function refresh(){
+ let p=getP();
+ let size=JSON.stringify(p).length;
+ let name=(inp.value.trim()||"NEON REPO_Zöld_ V4 -  FILE ÖRÖK");
+ let file=name.toLowerCase().endsWith(".json")?name:name+".json";
+ fname.textContent=file;
+ cnt.textContent=p.length;
+ yellow.textContent="REPO: 1. REPO - "+(size/1024/1024).toFixed(2).replace('.',',')+"MB - 500MB";
+}
+inp.addEventListener("input",refresh);
+function open(){refresh();ov.classList.add("open")}
+function close(){ov.classList.remove("open")}
+$("neon-e-cancel").addEventListener("click",close);
+ov.addEventListener("click",e=>{if(e.target===ov)close()});
+$("neon-e-ok").addEventListener("click",()=>{
+ let p=getP();
+ let name=(inp.value.trim()||"NEON REPO_Zöld_ V4 -  FILE ÖRÖK");
+ if(!name.toLowerCase().endsWith(".json"))name+=".json";
+ let blob=new Blob([JSON.stringify(p,null,2)],{type:"application/json"});
+ let url=URL.createObjectURL(blob);
+ let a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+ close();
+});
+function hook(){
+ let b=[...document.querySelectorAll("button")].find(x=>x.textContent&&x.textContent.trim()==="EXPORT JSON");
+ if(b){let c=b.cloneNode(true);b.parentNode.replaceChild(c,b);c.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();open();});return true}
+ return false;
+}
+let k=0;let iv=setInterval(()=>{if(hook()||k>200)clearInterval(iv);k++;},200);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
+})();
+</script>
+<!-- EXPORT VARIATION ONLY - END -->
+
 </body>
 </html>
