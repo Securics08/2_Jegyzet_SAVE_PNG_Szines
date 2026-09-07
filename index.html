@@ -168,5 +168,286 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
 </script>
 <!-- EXPORT VARIATION ONLY - END -->
 
+
+
+
+
+
+
+
+
+<!-- IMPORT VARIATION ONLY - START -->
+<style id="neon-import-only">
+#neon-import-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:2147483647;padding:16px}
+#neon-import-overlay.open{display:flex}
+#neon-import-box{width:100%;max-width:640px;background:#0a0a0a;border:2px solid #00ff41;border-radius:20px;box-shadow:0 0 18px #00ff41;padding:18px;font-family:Consolas,monospace;color:#fff;max-height:96vh;overflow:auto}
+#neon-resize-handle{width:100%;height:16px;display:flex;align-items:center;justify-content:center;cursor:ns-resize}
+#neon-resize-handle::before{content:"";width:60px;height:4px;background:#00ff41;border-radius:10px}
+.neon-i-head{border:1.5px solid #00ff41;border-radius:12px;padding:9px;text-align:center;color:#00eaff;font-weight:900}
+.neon-i-drop{margin-top:10px;width:100%;background:#001414;border:1.6px dashed #00e5ff;border-radius:12px;padding:16px;color:#00e5ff;font-weight:800;text-align:center;cursor:pointer}
+.neon-i-yellow{margin-top:10px;background:#ffcc00;border-radius:12px;padding:10px;color:#000;font-weight:900;text-align:center;font-size:12px;word-break:break-all}
+.neon-i-actions{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:12px}
+.neon-i-btn{border:none;border-radius:10px;padding:10px;font-weight:900;cursor:pointer;font-size:12px}
+.neon-i-cancel{background:#2a2a2a;color:#ddd}
+.neon-i-ok{background:#00ff41;color:#000}
+.neon-i-ok:disabled{opacity:.3}
+.neon-i-reset{background:#ff0040!important;color:#fff!important}
+.neon-i-diag{background:#8a2cff!important;color:#fff!important}
+#neon-import-file{display:none}
+#neon-import-btn,#neon-reset-btn{all:unset;display:inline-flex!important;background:#00ff41!important;color:#000!important;border:1.5px solid #00ff41!important;padding:7px 12px!important;border-radius:8px!important;font-family:Consolas,monospace!important;font-weight:900!important;font-size:12px!important;cursor:pointer!important;margin-left:6px!important}
+#neon-reset-btn{background:#ff0040!important;color:#fff!important;border-color:#ff0040!important}
+#neon-import-float{position:fixed!important;top:12px!important;right:12px!important;z-index:2147483646!important;background:#00ff41!important;color:#000!important;border:2px solid #00ff41!important;border-radius:10px!important;padding:8px 14px!important;font-family:Consolas,monospace!important;font-weight:900!important;cursor:pointer!important}
+#neon-reset-float{position:fixed!important;top:12px!important;right:130px!important;z-index:2147483646!important;background:#ff0040!important;color:#fff!important;border:2px solid #ff0040!important;border-radius:10px!important;padding:8px 12px!important;font-family:Consolas,monospace!important;font-weight:900!important;cursor:pointer!important}
+#neon-i-log{margin-top:6px;font-size:10px;color:#0ff;max-height:110px;overflow:auto;background:#000;padding:5px;border-radius:6px;white-space:pre-wrap}
+#neon-i-percent{font-size:24px;font-weight:900;color:#00ff41}
+#neon-i-progress{height:10px;background:#111;border-radius:8px;overflow:hidden;margin-top:4px;border:1px solid #333}
+#neon-i-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#00ff41,#00e5ff);transition:width .1s}
+</style>
+<div id="neon-import-overlay">
+ <div id="neon-import-box">
+  <div id="neon-resize-handle"></div>
+  <div class="neon-i-head">IMPORT - FINAL FIX 0% BUG</div>
+  <div class="neon-i-drop" id="neon-i-drop">KATTINTS / HUZD IDE<br><span style="font-size:10px">eredeti szin megmarad - nem var IDB-re</span></div>
+  <input type="file" id="neon-import-file" accept=".json,.txt,.js"/>
+  <div class="neon-i-yellow" id="neon-i-yellow">Nincs fajl</div>
+  <div style="display:flex;justify-content:space-between;margin-top:8px"><div id="neon-i-percent">0%</div><div id="neon-i-percent-detail" style="font-size:11px;color:#00e5ff">0 / 0</div></div>
+  <div id="neon-i-progress"><div id="neon-i-progress-bar"></div></div>
+  <div id="neon-i-preview" style="margin-top:8px;max-height:180px;overflow:auto"></div>
+  <div style="font-size:11px;color:#777;margin-top:6px">LS: <b id="neon-i-cur">0</b> | IDB: <b id="neon-i-cur-idb">0</b> | <span id="neon-i-key">NEON_V4_LS</span></div>
+  <div style="margin-top:4px"><label><input type="checkbox" id="neon-i-merge" checked/> merge</label> <label style="margin-left:8px"><input type="checkbox" id="neon-i-keepcolor" checked/> eredeti szin</label></div>
+  <div id="neon-i-log"></div>
+  <div class="neon-i-actions">
+   <button class="neon-i-btn neon-i-cancel" id="neon-i-cancel">MEGSE</button>
+   <button class="neon-i-btn neon-i-reset" id="neon-i-reset-inner">RESET</button>
+   <button class="neon-i-btn neon-i-diag" id="neon-i-diag">DIAG</button>
+   <button class="neon-i-btn neon-i-ok" id="neon-i-ok" disabled>IMPORT</button>
+  </div>
+ </div>
+</div>
+<script id="neon-i-js">
+(function(){
+var DB="NEON_REPO_V4_DB";
+var LS_KEYS=["NEON_V4_LS","NEON_V4","NEON_REPO","NEON_V4_SPLITTER"];
+var $=function(id){return document.getElementById(id);};
+var ov=$("neon-import-overlay"), drop=$("neon-i-drop"), fileIn=$("neon-import-file");
+var yellow=$("neon-i-yellow"), curEl=$("neon-i-cur"), curIdbEl=$("neon-i-cur-idb"), keyEl=$("neon-i-key");
+var okBtn=$("neon-i-ok"), mergeChk=$("neon-i-merge"), keepColorChk=$("neon-i-keepcolor"), logEl=$("neon-i-log");
+var percentEl=$("neon-i-percent"), detailEl=$("neon-i-percent-detail"), barEl=$("neon-i-progress-bar");
+var pending=null;
+
+function log(m){ console.log("[FIX]",m); if(logEl) logEl.textContent=(new Date().toLocaleTimeString())+" "+m+"\n"+logEl.textContent; }
+function setP(done,total,txt){
+  var pct=total?Math.round(done/total*100):0;
+  if(percentEl) percentEl.textContent=pct+"%";
+  if(detailEl) detailEl.textContent=done+" / "+total;
+  if(barEl) barEl.style.width=pct+"%";
+  if(yellow) yellow.textContent=(txt||"")+" "+done+"/"+total+" ("+pct+"%)";
+}
+function openDBTimeout(ms){
+  ms=ms||1500;
+  return new Promise(function(res,rej){
+    var timer=setTimeout(function(){ log("IDB open timeout "+ms+"ms - skip"); rej(new Error("IDB timeout")); }, ms);
+    try{
+      var req=indexedDB.open(DB,1);
+      req.onupgradeneeded=function(){ var d=req.result; if(!d.objectStoreNames.contains("projects")) d.createObjectStore("projects",{keyPath:"id"}); };
+      req.onsuccess=function(){ clearTimeout(timer); res(req.result); };
+      req.onerror=function(){ clearTimeout(timer); rej(req.error); };
+      req.onblocked=function(){ log("IDB blocked - masik tab nyitva"); };
+    }catch(e){ clearTimeout(timer); rej(e); }
+  });
+}
+function getIDBNoWait(){
+  return openDBTimeout(1200).then(function(db){
+    return new Promise(function(res){
+      var done=false;
+      var timer=setTimeout(function(){ if(!done){ log("IDB getAll timeout - 0-t ad vissza"); res([]); } }, 1500);
+      try{
+        var tx=db.transaction("projects","readonly");
+        var req=tx.objectStore("projects").getAll();
+        req.onsuccess=function(){ if(!done){ done=true; clearTimeout(timer); res(req.result||[]); } };
+        req.onerror=function(){ if(!done){ done=true; clearTimeout(timer); log("IDB getAll error - 0"); res([]); } };
+      }catch(e){ if(!done){ done=true; clearTimeout(timer); res([]); } }
+    });
+  }).catch(function(){ return []; });
+}
+function detectLS(){ for(var i=0;i<LS_KEYS.length;i++){ try{ var v=localStorage.getItem(LS_KEYS[i]); if(v){ var a=JSON.parse(v); if(Array.isArray(a) || (a&&Array.isArray(a.projects))) return LS_KEYS[i]; if(v.length>2) return LS_KEYS[i]; } }catch(e){} } return "NEON_V4_LS"; }
+function getLS(){ var k=detectLS(); if(keyEl) keyEl.textContent=k; try{ var s=localStorage.getItem(k); if(!s) return []; var a=JSON.parse(s); return Array.isArray(a)?a:(a.projects||a.data||[]); }catch(e){return []} }
+function refresh(){ try{ curEl.textContent=getLS().length; }catch(e){curEl.textContent="0"} getIDBNoWait().then(function(a){ curIdbEl.textContent=a.length; }); }
+function open(){ refresh(); ov.classList.add("open"); }
+function close(){ ov.classList.remove("open"); pending=null; try{ fileIn.value=""; }catch(e){} okBtn.disabled=true; setP(0,0,"Nincs fajl"); }
+
+function parseAny(t){
+  var txt=t.trim(); if(txt.charCodeAt(0)===65279) txt=txt.slice(1);
+  try{ return JSON.parse(txt); }catch(e){}
+  try{ var sub=txt.slice(txt.indexOf("["), txt.lastIndexOf("]")+1); return JSON.parse(sub); }catch(e){}
+  try{ var sub2=txt.slice(txt.indexOf("{"), txt.lastIndexOf("}")+1); return JSON.parse(sub2); }catch(e){}
+  throw new Error("Nem JSON");
+}
+function normalize(raw){
+  var arr;
+  if(Array.isArray(raw)) arr=raw;
+  else if(raw && Array.isArray(raw.projects)) arr=raw.projects;
+  else if(raw && Array.isArray(raw.data)) arr=raw.data;
+  else if(raw && typeof raw==="object"){
+    var vals=Object.values(raw);
+    var objs=vals.filter(function(v){return v&&typeof v==="object"});
+    if(objs.length && objs.length===vals.length) arr=objs;
+    else if(vals.some(function(v){return Array.isArray(v)})) arr=vals.find(function(v){return Array.isArray(v)});
+    else arr=[raw];
+  } else throw new Error("Ismeretlen");
+  var keepColor = keepColorChk.checked;
+  return arr.map(function(it,idx){
+    if(!it || typeof it!=="object") return { id:"import_"+Date.now()+"_"+idx, name:String(it).slice(0,80), content:String(it), code:String(it), color:keepColor?"": "#0f0", header:"", font:"", size:"", timestamp:Date.now(), updatedAt:Date.now(), date:Date.now() };
+    var out={};
+    for(var k in it) out[k]=it[k];
+    if(!out.id) out.id="import_"+Date.now()+"_"+idx+"_"+Math.random().toString(36).slice(2,4);
+    if(!out.name) out.name=out.header||("Elem "+(idx+1));
+    if(keepColor){ if(out.color==null || out.color==="") out.color="#0f0"; }
+    else { if(!out.color) out.color="#0f0"; }
+    if(out.code==null && out.content!=null) out.code=out.content;
+    if(out.content==null && out.code!=null) out.content=out.code;
+    if(!out.code) out.code="";
+    if(!out.content) out.content=out.code;
+    if(!out.updatedAt) out.updatedAt=Date.now();
+    if(!out.date) out.date=Date.now();
+    if(!out.timestamp) out.timestamp=Date.now();
+    return out;
+  }).filter(Boolean);
+}
+
+function handleFile(f){
+  var r=new FileReader();
+  var t0=performance.now();
+  r.onload=function(){
+    try{
+      var parsed=parseAny(r.result);
+      var norm=normalize(parsed);
+      pending=norm;
+      var dt=performance.now()-t0;
+      setP(0, norm.length, "Keszen "+norm.length+" elem - eredeti szinek");
+      yellow.textContent="OK "+f.name+" - "+norm.length+" elem - "+(r.result.length/1024).toFixed(0)+"KB - "+dt.toFixed(0)+"ms - szinek: "+norm.slice(0,3).map(function(x){return x.color;}).join(", ");
+      $("neon-i-preview").innerHTML="<div style='background:#001a00;border:1px solid #00ff41;border-radius:8px;padding:6px;max-height:160px;overflow:auto'>"+norm.slice(0,4).map(function(it,i){ var c=it.color||"#0f0"; return "<div style='border-left:4px solid "+c+";background:#0a0a0a;padding:5px;margin:4px 0;border-radius:5px'><div style='color:#ffcc00;font-size:11px'>"+(i+1)+". "+String(it.name||it.id).slice(0,60)+" <span style='background:"+c+";color:#000;padding:1px 4px;border-radius:4px;font-size:10px'>"+c+"</span></div><div style='font-size:10px;color:#888'>header:"+(it.header||"").slice(0,40)+"</div></div>"; }).join("")+(norm.length>4?"<div style='text-align:center;color:#666;font-size:10px'>+ "+(norm.length-4)+" tovabbi eredeti szinben</div>":"")+"</div>";
+      okBtn.disabled=false;
+      log("Parse OK "+norm.length+" szinek "+norm.slice(0,5).map(function(x){return x.color;}).join(", "));
+    }catch(e){ log("Parse hiba: "+e.message); yellow.textContent="Hiba: "+e.message; okBtn.disabled=true; }
+  };
+  r.readAsText(f,'utf-8');
+}
+
+$("neon-i-cancel").addEventListener("click",close);
+ov.addEventListener("click",function(e){if(e.target===ov)close();});
+drop.addEventListener("click",function(){fileIn.click();});
+fileIn.addEventListener("change",function(){ if(fileIn.files[0]) handleFile(fileIn.files[0]); });
+drop.addEventListener("dragover",function(e){e.preventDefault();});
+drop.addEventListener("drop",function(e){e.preventDefault(); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);});
+
+$("neon-i-diag").addEventListener("click",function(){
+  refresh();
+  var ls=getLS();
+  log("DIAG LS key="+detectLS()+" len="+ls.length+" size="+(JSON.stringify(ls).length/1024).toFixed(1)+"KB");
+  getIDBNoWait().then(function(all){ log("DIAG IDB count="+all.length); }).catch(function(){ log("DIAG IDB timeout"); });
+  for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.toLowerCase().indexOf("neon")>=0){ var v=localStorage.getItem(k); log("LS kulcs "+k+" len="+(v?v.length:0)+" elso 50: "+(v?v.slice(0,50):"")); } }
+});
+
+$("neon-i-reset-inner").addEventListener("click",function(){
+  if(!confirm("RESET? Minden torlodik")) return;
+  (async function(){
+    try{ for(var i=0;i<LS_KEYS.length;i++) localStorage.removeItem(LS_KEYS[i]); for(var i=localStorage.length-1;i>=0;i--){ var k=localStorage.key(i); if(k&&k.toLowerCase().indexOf("neon")>=0) localStorage.removeItem(k); } try{ var db=await openDBTimeout(1000); var tx=db.transaction("projects","readwrite"); tx.objectStore("projects").clear(); }catch(e){} try{ indexedDB.deleteDatabase(DB); }catch(e){} log("RESET KESZ reload"); setTimeout(function(){location.reload();},500); }catch(e){ log("RESET hiba "+e.message); }
+  })();
+});
+
+$("neon-i-ok").addEventListener("click",function(){
+  if(!pending) return;
+  okBtn.disabled=true;
+  $("neon-i-cancel").disabled=true;
+  var t0=performance.now();
+  setP(0, pending.length, "Import indul - nem var IDB-re");
+  log("IMPORT START len="+pending.length+" merge="+mergeChk.checked+" keepColor="+keepColorChk.checked);
+  // FONTOS: NEM varunk IDB-re, azonnal LS-t irunk - ez javitja a 0% bugot
+  try{
+    var cur=getLS();
+    var next;
+    if(mergeChk.checked){
+      var map=new Map();
+      cur.forEach(function(x){ if(!x) return; var k=x.id?String(x.id):JSON.stringify(x).slice(0,200); if(!map.has(k)) map.set(k,x); });
+      pending.forEach(function(x){ var k=x.id?String(x.id):JSON.stringify(x).slice(0,200); map.set(k,x); });
+      next=Array.from(map.values());
+    } else {
+      next=pending.slice();
+    }
+    setP(10, next.length, "LS iras");
+    log("Ossz "+next.length+" (cur "+cur.length+" + uj "+pending.length+") szinek "+next.slice(0,3).map(function(x){return x.color;}).join(", "));
+
+    // LS AZONNAL - ez a lenyeg
+    var k=detectLS();
+    var jsonStr=JSON.stringify(next);
+    log("LS iras "+k+" size="+(jsonStr.length/1024/1024).toFixed(2)+"MB");
+    localStorage.setItem(k, jsonStr);
+    setP(50, next.length, "LS kesz");
+    log("LS KESZ "+next.length+" - "+(jsonStr.length/1024).toFixed(1)+"KB");
+
+    // IDB-t probaljuk torolni hatterben, de nem blokkol
+    setP(60, next.length, "IDB torles hatterben");
+    openDBTimeout(1500).then(function(db){
+      try{
+        var tx=db.transaction("projects","readwrite");
+        tx.objectStore("projects").clear();
+        tx.oncomplete=function(){ log("IDB clear OK - app ujraepiti LS-bol eredeti szinekkel"); };
+        tx.onerror=function(){ log("IDB clear hiba, de LS megvan - reload jon"); };
+      }catch(e){ log("IDB clear catch "+e.message); }
+      try{ indexedDB.deleteDatabase(DB); log("IDB deleteDatabase hivva"); }catch(e){}
+    }).catch(function(e){ log("IDB open hiba (nem baj, LS megvan): "+e.message); });
+
+    var dt=performance.now()-t0;
+    setP(next.length, next.length, "KESZ "+dt.toFixed(0)+"ms - reload");
+    yellow.textContent="KESZ! "+next.length+" elem eredeti szinekben - "+dt.toFixed(0)+"ms - Reload...";
+    log("KESZ FINAL "+next.length+" elem eredeti szinekkel "+dt.toFixed(0)+"ms - reload 1s");
+    setTimeout(function(){ location.reload(); }, 1000);
+
+  }catch(e){
+    log("IMPORT hiba: "+e.message);
+    yellow.textContent="Hiba: "+e.message+" - probald RESET utan";
+    okBtn.disabled=false;
+    $("neon-i-cancel").disabled=false;
+    if(e.name==="QuotaExceededError"){
+      log("QUOTA HIBA: tul nagy a fajl LS-hez. Probald kisebb darabokban vagy RESET utan merge nelkul");
+    }
+  }
+});
+
+function ensureButtons(){
+  if(!document.getElementById("neon-import-float")){
+    var fb=document.createElement("button");fb.id="neon-import-float";fb.textContent="IMPORT JSON";fb.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();$("neon-import-overlay").classList.add("open"); refresh();});document.body.appendChild(fb);
+  }
+  if(!document.getElementById("neon-reset-float")){
+    var rb=document.createElement("button");rb.id="neon-reset-float";rb.textContent="RESET ALL";rb.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();if(confirm("RESET?")){ (async function(){ try{ for(var i=0;i<LS_KEYS.length;i++) localStorage.removeItem(LS_KEYS[i]); for(var i=localStorage.length-1;i>=0;i--){var k=localStorage.key(i); if(k&&k.toLowerCase().indexOf("neon")>=0) localStorage.removeItem(k);} try{ var db=await openDBTimeout(800); var tx=db.transaction("projects","readwrite"); tx.objectStore("projects").clear(); }catch(e){} try{ indexedDB.deleteDatabase(DB);}catch(e){} location.reload(); }catch(e){} })(); }});document.body.appendChild(rb);
+  }
+  var exportBtns=[].slice.call(document.querySelectorAll("button")).filter(function(b){var t=(b.textContent||"").trim().toUpperCase();return t==="EXPORT JSON"||(t.indexOf("EXPORT")>=0&&t.indexOf("JSON")>=0);});
+  exportBtns.forEach(function(eb){
+    if(eb.parentNode&&!eb.parentNode.querySelector("#neon-import-btn")){
+      var btn=document.createElement("button");btn.id="neon-import-btn";btn.textContent="IMPORT JSON";btn.className=eb.className;btn.style.background="#00ff41";btn.style.color="#000";btn.style.border="1.5px solid #00ff41";btn.style.marginLeft="6px";btn.style.fontWeight="900";btn.style.cursor="pointer";eb.parentNode.insertBefore(btn,eb.nextSibling);btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();$("neon-import-overlay").classList.add("open"); refresh();});
+    }
+    if(eb.parentNode&&!eb.parentNode.querySelector("#neon-reset-btn")){
+      var rb2=document.createElement("button");rb2.id="neon-reset-btn";rb2.textContent="RESET";rb2.className=eb.className;rb2.style.background="#ff0040";rb2.style.color="#fff";rb2.style.border="1.5px solid #ff0040";rb2.style.marginLeft="6px";rb2.style.fontWeight="900";rb2.style.cursor="pointer";eb.parentNode.insertBefore(rb2,eb.nextSibling.nextSibling||null);rb2.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();if(confirm("RESET?")){ (async function(){ try{ for(var i=0;i<LS_KEYS.length;i++) localStorage.removeItem(LS_KEYS[i]); for(var i=localStorage.length-1;i>=0;i--){var k=localStorage.key(i); if(k&&k.toLowerCase().indexOf("neon")>=0) localStorage.removeItem(k);} try{ var db=await openDBTimeout(800); var tx=db.transaction("projects","readwrite"); tx.objectStore("projects").clear(); }catch(e){} try{ indexedDB.deleteDatabase(DB);}catch(e){} location.reload(); }catch(e){} })(); }});}
+  });
+}
+ensureButtons();
+var tries=0;var iv=setInterval(function(){ensureButtons();tries++;if(tries>500)clearInterval(iv)},300);
+try{var mo=new MutationObserver(function(){ensureButtons()});mo.observe(document.body,{childList:true,subtree:true});setTimeout(function(){mo.disconnect()},20000)}catch(e){}
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){close()}});
+})();
+</script>
+<!-- IMPORT VARIATION ONLY - END -->
+
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>
